@@ -5,20 +5,22 @@ const Header = (props) => {
 const Content = (props) => {
   return (
     <ol>
-      <li>
-        {props.parts[0]} {props.exercises[0]}
-      </li>
-      <li>
-        {props.parts[1]} {props.exercises[1]}
-      </li>
-      <li>
-        {props.parts[2]} {props.exercises[2]}
-      </li>
+      <Part part={props.parts[0]} exercise={props.exercises[0]} />
+      <Part part={props.parts[1]} exercise={props.exercises[1]} />
+      <Part part={props.parts[2]} exercise={props.exercises[2]} />
     </ol>
   );
 };
 
-const Footer = (props) => {
+const Part = (props) => {
+  return (
+    <li>
+      {props.part} {props.exercise}
+    </li>
+  );
+};
+
+const Total = (props) => {
   return (
     <p>
       {props.text} {props.exercises}
@@ -42,7 +44,7 @@ const App = () => {
         parts={[part1, part2, part3]}
         exercises={[exercises1, exercises2, exercises3]}
       />
-      <Footer
+      <Total
         text="Number of exercises"
         exercises={exercises1 + exercises2 + exercises3}
       />
