@@ -1,20 +1,28 @@
 import { useState, useEffect } from "react";
 import personsService from "./services/persons";
+import "./index.css";
 
 const Person = ({ person, deleteHandler }) => {
   return (
-    <li>
-      {person.name}
-      {person.number}
-      <button onClick={deleteHandler}>delete</button>
-    </li>
+    <tr>
+      <td>
+        <p>
+          {person.name}
+          {person.number}
+        </p>
+      </td>
+      <td>
+        <button onClick={deleteHandler}>delete</button>
+      </td>
+    </tr>
   );
 };
 
 const Filter = ({ value, handler }) => {
   return (
-    <div>
-      search: <input value={value} onChange={handler} />
+    <div className="container">
+      <p className="inputName">search</p>
+      <input value={value} onChange={handler} />
     </div>
   );
 };
@@ -27,26 +35,42 @@ const Form = ({
   saveNewName,
 }) => {
   return (
-    <form onSubmit={(event) => event.preventDefault()}>
-      <div>
-        name: <input value={newName} onChange={handleNameChange} />
-      </div>
-      <div>
-        number: <input value={newNumber} onChange={handleNumberChange} />
-      </div>
-      <div>
-        <button type="submit" onClick={saveNewName}>
-          add
-        </button>
-      </div>
-    </form>
+    <div className="container">
+      <form onSubmit={(event) => event.preventDefault()}>
+        <div className="center">
+          <p className="inputName">name</p>
+          <input value={newName} onChange={handleNameChange} />
+        </div>
+        <div>
+          <p className="inputName">number</p>
+          <input value={newNumber} onChange={handleNumberChange} />
+        </div>
+        <div>
+          <button type="submit" onClick={saveNewName}>
+            add
+          </button>
+        </div>
+      </form>
+    </div>
   );
+};
+
+const Notification = ({ msg }) => {
+  const notifStyle = {
+    color: "green",
+    fontSize: 30,
+    background: "lightgrey",
+    textAlign: "center",
+  };
+  if (msg === null) return null;
+  else return <p style={notifStyle}>{msg}</p>;
 };
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchValue, setSearchValue] = useState("");
+  const [notifMsg, setNotifMsg] = useState(null);
 
   const getData = () => {
     console.log("effect");
@@ -92,6 +116,7 @@ const App = () => {
         setPersons(persons.concat(data));
         setNewName("");
         setNewNumber("");
+        setNotifMsg(`${newPerson.name} was added`);
       });
     }
   };
@@ -99,7 +124,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Filter value={searchValue} handler={handleSearchChange} />
+      <Notification msg={notifMsg} />
+
       <h2>add a new</h2>
       <Form
         newName={newName}
@@ -109,15 +135,20 @@ const App = () => {
         saveNewName={saveNewName}
       />
       <h2>Persons</h2>
-      <ul>
-        {personsToShow.map((person) => (
-          <Person
-            key={person.name}
-            person={person}
-            deleteHandler={() => deleteHandler(person.id)}
-          />
-        ))}
-      </ul>
+      <Filter value={searchValue} handler={handleSearchChange} />
+      <div className="container">
+        <table>
+          <tbody>
+            {personsToShow.map((person) => (
+              <Person
+                key={person.name}
+                person={person}
+                deleteHandler={() => deleteHandler(person.id)}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
