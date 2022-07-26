@@ -1,12 +1,47 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const Person = ({ person }) => {
+const Country = ({ country }) => {
+  const [show, setShow] = useState(false);
+  const showDetails = () => {
+    setShow(!show);
+  };
+  if (show) {
+    return (
+      <div>
+        <li>
+          {country.name.official} <button onClick={showDetails}>hide</button>
+        </li>
+        <DetailCountry country={country} />
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <li>
+          {country.name.official} <button onClick={showDetails}>show</button>
+        </li>
+      </div>
+    );
+  }
+};
+const DetailCountry = ({ country }) => {
+  console.log(Object.values(country.languages));
   return (
-    <li>
-      {person.name}
-      {person.number}
-    </li>
+    <div>
+      <h2>{country.name.official}</h2>
+      <ul>
+        <li>capital: {country.capital}</li>
+        <li>area: {country.area}</li>
+      </ul>
+      <h3>languages</h3>
+      <ul>
+        {Object.values(country.languages).map((l) => (
+          <li>{l}</li>
+        ))}
+      </ul>
+      <img src={country.flags.png} />
+    </div>
   );
 };
 
@@ -16,6 +51,23 @@ const Filter = ({ value, handler }) => {
       search: <input value={value} onChange={handler} />
     </div>
   );
+};
+
+const Countries = ({ countries }) => {
+  if (countries.length === 1) {
+    return <DetailCountry country={countries[0]} />;
+  }
+  if (countries.length > 10) {
+    return <p>to many to show</p>;
+  } else {
+    return (
+      <ul>
+        {countries.map((c) => (
+          <Country key={c.name["official"]} country={c} />
+        ))}
+      </ul>
+    );
+  }
 };
 
 const Form = ({
@@ -42,23 +94,24 @@ const Form = ({
   );
 };
 const App = () => {
-  const [persons, setPersons] = useState([]);
+  const [countries, setCountries] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchValue, setSearchValue] = useState("");
 
   const getData = () => {
     console.log("effect");
-    axios.get("http://localhost:3002/persons").then((response) => {
+    axios.get("https://restcountries.com/v3.1/all").then((response) => {
       console.log("response");
-      setPersons(response.data);
+      setCountries(response.data);
     });
   };
   useEffect(getData, []);
-  console.log("render", persons.length, "persons");
+  console.log("render", countries.length, "countries");
+  console.log(countries[1]);
 
-  var personsToShow = persons.filter((p) =>
-    p.name.toLowerCase().match(searchValue.toLowerCase())
+  var countriesToShow = countries.filter((p) =>
+    p.name["official"].toLowerCase().match(searchValue.toLowerCase())
   );
 
   const handleNameChange = (event) => {
@@ -75,10 +128,10 @@ const App = () => {
   };
 
   const saveNewName = () => {
-    if (persons.find((p) => p.name === newName)) {
+    if (countries.find((p) => p.name === newName)) {
       alert("name already exists");
     } else {
-      setPersons(persons.concat({ name: newName, number: newNumber }));
+      // setCountries(countries.concat({ name: newName, number: newNumber }));
       setNewName("");
       setNewNumber("");
     }
@@ -88,20 +141,9 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
       <Filter value={searchValue} handler={handleSearchChange} />
-      <h2>add a new</h2>
-      <Form
-        newName={newName}
-        handleNameChange={handleNameChange}
-        newNumber={newNumber}
-        handleNumberChange={handleNumberChange}
-        saveNewName={saveNewName}
-      />
-      <h2>Persons</h2>
-      <ul>
-        {personsToShow.map((person) => (
-          <Person key={person.name} person={person} />
-        ))}
-      </ul>
+
+      <h2>Countries</h2>
+      <Countries countries={countriesToShow} />
     </div>
   );
 };
