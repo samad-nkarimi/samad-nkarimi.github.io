@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import personsService from "./services/persons";
 
-const Person = ({ person }) => {
+const Person = ({ person, deleteHandler }) => {
   return (
     <li>
       {person.name}
       {person.number}
+      <button onClick={deleteHandler}>delete</button>
     </li>
   );
 };
@@ -49,9 +50,9 @@ const App = () => {
 
   const getData = () => {
     console.log("effect");
-    axios.get("http://localhost:3002/persons").then((response) => {
+    personsService.getAll().then((data) => {
       console.log("response");
-      setPersons(response.data);
+      setPersons(data);
     });
   };
   useEffect(getData, []);
@@ -73,14 +74,25 @@ const App = () => {
     console.log(event.target.value);
     setSearchValue(event.target.value);
   };
+  const deleteHandler = (id) => {
+    const isOk = window.confirm(`delete pesron with id ${id}?`);
+    if (!isOk) return;
+    personsService.deletePerson(id).then((data) => {
+      console.log(data);
+      setPersons(persons.filter((p) => p.id !== id));
+    });
+  };
 
   const saveNewName = () => {
+    const newPerson = { name: newName, number: newNumber };
     if (persons.find((p) => p.name === newName)) {
       alert("name already exists");
     } else {
-      setPersons(persons.concat({ name: newName, number: newNumber }));
-      setNewName("");
-      setNewNumber("");
+      personsService.create({ newPerson }).then((data) => {
+        setPersons(persons.concat(data));
+        setNewName("");
+        setNewNumber("");
+      });
     }
   };
 
@@ -99,7 +111,11 @@ const App = () => {
       <h2>Persons</h2>
       <ul>
         {personsToShow.map((person) => (
-          <Person key={person.name} person={person} />
+          <Person
+            key={person.name}
+            person={person}
+            deleteHandler={() => deleteHandler(person.id)}
+          />
         ))}
       </ul>
     </div>
